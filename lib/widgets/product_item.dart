@@ -33,16 +33,17 @@ class ProductItem extends StatelessWidget {
         ),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
-          leading: Consumer<Product>(
-            builder: (context, value, _) => IconButton(
-              //child can be used to refer to a widget which does not changes in the Consumer argument
-              icon: Icon(
-                productsdata.isFavourite
-                    ? Icons.favorite
-                    : Icons.favorite_border,
+          leading: SizedBox(
+            width: MediaQuery.of(context).size.width * .020,
+            child: Consumer<Product>(
+              builder: (context, product, _) => IconButton(
+                //child (_) can be used to refer to a widget which does not changes in the Consumer argument
+                icon: Icon(
+                  product.isFavourite ? Icons.favorite : Icons.favorite_border,
+                ),
+                onPressed: () => product.togglefavourite(),
+                color: Theme.of(context).accentColor,
               ),
-              onPressed: () => productsdata.togglefavourite(),
-              color: Theme.of(context).accentColor,
             ),
           ),
           title: Text(
