@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:myshop/models/http_exception.dart';
 import 'package:provider/provider.dart';
 import '../Providers/auth.dart';
 
@@ -14,6 +15,7 @@ class AuthScreen extends StatelessWidget {
     final deviceSize = MediaQuery.of(context).size;
     // final transformConfig = Matrix4.rotationZ(-8 * pi / 180);
     // transformConfig.translate(-10.0);
+
     return Scaffold(
       // resizeToAvoidBottomInset: false,
       body: Stack(
@@ -101,6 +103,23 @@ class _AuthCardState extends State<AuthCard> {
     'email': '',
     'password': '',
   };
+  void _showErrorDialog(String sms) {
+    showDialog(
+      context: context,
+      builder: ((ctx) => AlertDialog(
+            title: Text("An Error Occured"),
+            content: Text(sms),
+            actions: [
+              TextButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  })
+            ],
+          )),
+    );
+  }
+
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
@@ -113,15 +132,36 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-      await Provider.of<Authentication>(context, listen: false)
-          .login(_authData['email'], _authData['password']);
-    } else {
-      // Sign user up
-      await Provider.of<Authentication>(context, listen: false)
-          .signup(_authData['email'], _authData['password']);
+    try {
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await Provider.of<Authentication>(context, listen: false)
+            .login(_authData['email'], _authData['password']);
+      } else {
+        // Sign user up
+        await Provider.of<Authentication>(context, listen: false)
+            .signup(_authData['email'], _authData['password']);
+      }
+    } on HttpException catch (error) {
+      // on is used to handle defined exception by Author
+      var errorMessage = "Authentication Failed";
+      if (error.toString().contains("EMAIL_EXISTS")) {
+        errorMessage = "This email address already exists";
+      } else if (error.toString().contains("EMAIL_NOT_FOUND")) {
+        errorMessage = "This email address does not exist";
+      } else if (error.toString().contains("INVALID_PASSWORD")) {
+        errorMessage = "This password is invalid";
+      } else if (error.toString().contains("WEAK_PASSWORD")) {
+        errorMessage = "This password is too short";
+      } else if (error.toString().contains("USER_DISABLED")) {
+        errorMessage =
+            "This user is currently disabled, Please contact the administrator.";
+      }
+      _showErrorDialog(errorMessage);
+    } catch (err) {
+      const messageError = 'Could Not Connect, Please Try Again Later';
     }
+
     setState(() {
       _isLoading = false;
     });
