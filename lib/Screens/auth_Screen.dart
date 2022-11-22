@@ -103,6 +103,8 @@ class _AuthCardState extends State<AuthCard> {
     'email': '',
     'password': '',
   };
+  var _isLoading = false;
+  final _passwordController = TextEditingController();
   void _showErrorDialog(String sms) {
     showDialog(
       context: context,
@@ -118,10 +120,8 @@ class _AuthCardState extends State<AuthCard> {
             ],
           )),
     );
+    // print(sms);
   }
-
-  var _isLoading = false;
-  final _passwordController = TextEditingController();
 
   Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
@@ -142,24 +142,31 @@ class _AuthCardState extends State<AuthCard> {
         await Provider.of<Authentication>(context, listen: false)
             .signup(_authData['email'], _authData['password']);
       }
-    } on HttpException catch (error) {
+    } on HttpExceptions catch (error) {
       // on is used to handle defined exception by Author
+      // print(error.toString());
       var errorMessage = "Authentication Failed";
       if (error.toString().contains("EMAIL_EXISTS")) {
         errorMessage = "This email address already exists";
+        print(errorMessage);
       } else if (error.toString().contains("EMAIL_NOT_FOUND")) {
         errorMessage = "This email address does not exist";
+        print(errorMessage);
       } else if (error.toString().contains("INVALID_PASSWORD")) {
         errorMessage = "This password is invalid";
+        print(errorMessage);
       } else if (error.toString().contains("WEAK_PASSWORD")) {
         errorMessage = "This password is too short";
+        print(errorMessage);
       } else if (error.toString().contains("USER_DISABLED")) {
         errorMessage =
             "This user is currently disabled, Please contact the administrator.";
+        print(errorMessage);
       }
       _showErrorDialog(errorMessage);
     } catch (err) {
-      const messageError = 'Could Not Connect, Please Try Again Later';
+      var messageError = 'Could Not Connect, Please Try Again Later';
+      _showErrorDialog(messageError);
     }
 
     setState(() {

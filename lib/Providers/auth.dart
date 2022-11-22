@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import '../models/http_exception.dart';
+
 class Authentication with ChangeNotifier {
   String _token;
   DateTime _expiryDate;
@@ -27,7 +28,7 @@ class Authentication with ChangeNotifier {
       print(json.decode(response.body));
       final resp = jsonDecode(response.body);
       if (resp['error' != null]) {
-        throw HttpException(resp['error']['message']);
+        throw HttpExceptions(resp['error']['message']);
       }
     } catch (err) {
       throw err;
